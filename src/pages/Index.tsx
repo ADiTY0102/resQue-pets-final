@@ -85,6 +85,7 @@ const Index = () => {
               <p className="text-muted-foreground mb-4">
                 Browse through pets ready for adoption and give them a forever home.
               </p>
+              <br /><br /><br />
               <Button className="w-full">View Pets</Button>
             </CardContent>
           </Card>
@@ -101,6 +102,7 @@ const Index = () => {
               <p className="text-muted-foreground mb-4">
                 List a pet for donation and help them find a caring home.
               </p>
+              <br /><br /><br />
               <Button className="w-full" variant="secondary" asChild>
                 <Link to={user ? "/profile?tab=donate" : "/auth"}>Donate Pet</Link>
               </Button>
