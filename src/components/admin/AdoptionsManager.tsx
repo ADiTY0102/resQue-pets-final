@@ -28,11 +28,25 @@ export const AdoptionsManager = () => {
 
   const updateStatusMutation = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
-      const { error } = await supabase
+      const { error: requestError } = await supabase
         .from("adoption_requests")
         .update({ request_status: status })
         .eq("id", id);
-      if (error) throw error;
+      
+      if (requestError) throw requestError;
+
+      // If approved, mark the pet as adopted
+      if (status === "approved") {
+        const request = requests?.find((r: any) => r.id === id);
+        if (request?.pet_id) {
+          const { error: petError } = await supabase
+            .from("pets")
+            .update({ status: "adopted" })
+            .eq("id", request.pet_id);
+          
+          if (petError) throw petError;
+        }
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-adoptions"] });

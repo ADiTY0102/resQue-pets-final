@@ -9,6 +9,7 @@ import { UsersManager } from "@/components/admin/UsersManager";
 import { AdoptionsManager } from "@/components/admin/AdoptionsManager";
 import { DonationsManager } from "@/components/admin/DonationsManager";
 import { FundsManager } from "@/components/admin/FundsManager";
+import { GalleryUpload } from "@/components/admin/GalleryUpload";
 
 const AdminDashboard = () => {
   const { user, signOut, loading } = useAuth();
@@ -53,11 +54,12 @@ const AdminDashboard = () => {
         </div>
 
         <Tabs defaultValue="users" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="users">Users</TabsTrigger>
             <TabsTrigger value="adoptions">Adoptions</TabsTrigger>
             <TabsTrigger value="donations">Donations</TabsTrigger>
             <TabsTrigger value="funds">Funds</TabsTrigger>
+            <TabsTrigger value="gallery">Gallery</TabsTrigger>
           </TabsList>
 
           <TabsContent value="users">
@@ -100,6 +102,17 @@ const AdminDashboard = () => {
               </CardHeader>
               <CardContent>
                 <FundsManager />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="gallery">
+            <Card>
+              <CardHeader>
+                <CardTitle>Upload Gallery Images</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <GalleryUpload />
               </CardContent>
             </Card>
           </TabsContent>

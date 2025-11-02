@@ -35,17 +35,16 @@ export const DonationsManager = () => {
       
       if (requestError) throw requestError;
 
-      // If approved, also update pet status
-      if (status === "approved") {
-        const request = requests?.find((r: any) => r.id === id);
-        if (request?.pet_id) {
-          const { error: petError } = await supabase
-            .from("pets")
-            .update({ status: "approved" })
-            .eq("id", request.pet_id);
-          
-          if (petError) throw petError;
-        }
+      // If approved, update pet status to approved for adoption
+      // If rejected, update pet status to rejected
+      const request = requests?.find((r: any) => r.id === id);
+      if (request?.pet_id) {
+        const { error: petError } = await supabase
+          .from("pets")
+          .update({ status: status === "approved" ? "approved" : "rejected" })
+          .eq("id", request.pet_id);
+        
+        if (petError) throw petError;
       }
     },
     onSuccess: () => {

@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Heart, PawPrint, DollarSign } from "lucide-react";
 import { Link } from "react-router-dom";
 import { GallerySection } from "@/components/home/GallerySection";
+import { Footer } from "@/components/home/Footer";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -86,7 +87,9 @@ const Index = () => {
                 Browse through pets ready for adoption and give them a forever home.
               </p>
               <br /><br /><br />
-              <Button className="w-full">View Pets</Button>
+              <Button className="w-full" asChild>
+                <Link to="/adopt">View Pets</Link>
+              </Button>
             </CardContent>
           </Card>
 
@@ -138,51 +141,8 @@ const Index = () => {
       {/* Gallery Section */}
       <GallerySection />
 
-      {/* Social Media */}
-      <section className="py-20 px-4">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-8">Connect With Us</h2>
-          <div className="flex gap-4 justify-center flex-wrap">
-            <Button variant="outline" size="lg" asChild>
-              <a
-                href="https://www.instagram.com/solapurpet"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Instagram
-              </a>
-            </Button>
-            <Button variant="outline" size="lg" asChild>
-              <a
-                href="https://chat.whatsapp.com/DoiiNrPW3cFE1Guon2AWIL"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                WhatsApp Community
-              </a>
-            </Button>
-            <Button variant="outline" size="lg" asChild>
-              <a
-                href="https://youtu.be/vJyGVfdaHlE"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                YouTube
-              </a>
-            </Button>
-          </div>
-        </div>
-      </section>
-
       {/* Footer */}
-      <footer className="bg-muted py-12 px-4">
-        <div className="max-w-7xl mx-auto text-center">
-          <p className="text-xl font-bold mb-2">MOWGLIANS</p>
-          <p className="text-muted-foreground">
-            Making the world a better place for pets, one adoption at a time.
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };
