@@ -121,24 +121,24 @@ const Fundraising = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="relative py-20 px-4 bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10">
-        <div className="max-w-6xl mx-auto text-center space-y-6">
-          <h1 className="text-5xl md:text-6xl font-bold text-foreground">
+      <section className="relative py-12 sm:py-16 lg:py-20 px-4 bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10">
+        <div className="max-w-6xl mx-auto text-center space-y-4 sm:space-y-6">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-foreground">
             Help Us Save More Lives
           </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-base sm:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto">
             Every contribution makes a difference in giving pets a second chance at life
           </p>
         </div>
       </section>
 
       {/* Fundraising Stats */}
-      <section className="py-12 px-4">
+      <section className="py-8 sm:py-10 lg:py-12 px-4">
         <div className="max-w-6xl mx-auto">
-          <Card className="mb-8">
+          <Card className="mb-6 sm:mb-8">
             <CardHeader>
-              <CardTitle className="text-3xl">Fundraising Progress</CardTitle>
-              <CardDescription>Help us reach our goal to care for more animals</CardDescription>
+              <CardTitle className="text-xl sm:text-2xl lg:text-3xl">Fundraising Progress</CardTitle>
+              <CardDescription className="text-sm sm:text-base">Help us reach our goal to care for more animals</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
@@ -197,7 +197,7 @@ const Fundraising = () => {
           </Card>
 
           {/* Impact Cards */}
-          <div className="grid md:grid-cols-3 gap-6 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6 mb-6 sm:mb-8">
             <Card>
               <CardHeader>
                 <Heart className="w-8 h-8 text-primary mb-2" />

@@ -94,31 +94,31 @@ const AdoptPets = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <section className="py-12 px-4 bg-gradient-to-r from-primary/10 to-secondary/10">
+      <section className="py-8 sm:py-10 lg:py-12 px-4 bg-gradient-to-r from-primary/10 to-secondary/10">
         <div className="max-w-7xl mx-auto">
-          <div className="flex justify-between items-center mb-4">
-            <h1 className="text-4xl md:text-5xl font-bold">Adopt a Pet</h1>
-            <Button variant="outline" asChild>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-4">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold">Adopt a Pet</h1>
+            <Button variant="outline" asChild className="w-full sm:w-auto">
               <Link to="/">Back to Home</Link>
             </Button>
           </div>
-          <p className="text-xl text-muted-foreground">
+          <p className="text-base sm:text-lg lg:text-xl text-muted-foreground">
             Find your perfect companion from our loving pets ready for adoption
           </p>
         </div>
       </section>
 
       {/* Pets Grid */}
-      <section className="py-12 px-4">
+      <section className="py-8 sm:py-10 lg:py-12 px-4">
         <div className="max-w-7xl mx-auto">
           {!pets || pets.length === 0 ? (
-            <Card className="p-12 text-center">
-              <p className="text-xl text-muted-foreground">
+            <Card className="p-8 sm:p-10 lg:p-12 text-center">
+              <p className="text-base sm:text-lg lg:text-xl text-muted-foreground">
                 No pets available for adoption at the moment. Check back soon!
               </p>
             </Card>
           ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
               {pets.map((pet) => (
                 <Card key={pet.id} className="hover:shadow-xl transition-all duration-300">
                   {pet.image_url && (

@@ -19,17 +19,17 @@ const UserProfile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background p-6">
+    <div className="min-h-screen bg-background p-4 sm:p-6">
       <div className="max-w-6xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">My Profile</h1>
-          <Button variant="outline" onClick={signOut}>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold">My Profile</h1>
+          <Button variant="outline" onClick={signOut} className="w-full sm:w-auto">
             Sign Out
           </Button>
         </div>
 
         <Tabs defaultValue="info" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 gap-1">
             <TabsTrigger value="info">Profile Info</TabsTrigger>
             <TabsTrigger value="donate">Donate Pet</TabsTrigger>
             <TabsTrigger value="adopt">Adoption Requests</TabsTrigger>

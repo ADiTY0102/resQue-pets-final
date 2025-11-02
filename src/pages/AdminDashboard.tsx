@@ -44,17 +44,17 @@ const AdminDashboard = () => {
   }
   // updated
   return (
-    <div className="min-h-screen bg-background p-6">
+    <div className="min-h-screen bg-background p-4 sm:p-6">
       <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-          <Button variant="outline" onClick={signOut}>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold">Admin Dashboard</h1>
+          <Button variant="outline" onClick={signOut} className="w-full sm:w-auto">
             Sign Out
           </Button>
         </div>
 
         <Tabs defaultValue="users" className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-1">
             <TabsTrigger value="users">Users</TabsTrigger>
             <TabsTrigger value="adoptions">Adoptions</TabsTrigger>
             <TabsTrigger value="donations">Donations</TabsTrigger>

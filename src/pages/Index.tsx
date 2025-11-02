@@ -30,14 +30,14 @@ const Index = () => {
       <section className="relative h-screen w-full overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-background/50 to-background z-10" />
         <div className="absolute inset-0 flex items-center justify-center z-20">
-          <div className="text-center space-y-6 px-4 animate-fade-in">
-            <h1 className="text-6xl md:text-8xl mb-10 font-bold text-foreground drop-shadow-lg">
+          <div className="text-center space-y-4 sm:space-y-6 px-4 animate-fade-in">
+            <h1 className="text-4xl sm:text-6xl md:text-8xl mb-6 sm:mb-10 font-bold text-foreground drop-shadow-lg">
               MOWGLIANS
             </h1> <br />
-            <p className="text-xl md:text-2xl text-foreground/90 font-medium drop-shadow">
+            <p className="text-base sm:text-xl md:text-2xl text-foreground/90 font-medium drop-shadow">
               Give Love, Find Love - Adopt or Donate a Pet Today
             </p>
-            <div className="flex gap-4 justify-center flex-wrap">
+            <div className="flex gap-3 sm:gap-4 justify-center flex-wrap">
               {user ? (
                 <>
                   <Button size="lg" asChild className="shadow-lg hover:shadow-xl">
@@ -68,12 +68,12 @@ const Index = () => {
       </section>
 
       {/* Three Cards Section */}
-      <section className="py-20 px-4 max-w-7xl mx-auto animate-fade-in">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold mb-4">How You Can Help</h2>
-          <p className="text-xl text-muted-foreground">Together, we can make a difference</p>
+      <section className="py-12 sm:py-16 lg:py-20 px-4 max-w-7xl mx-auto animate-fade-in">
+        <div className="text-center mb-8 sm:mb-12">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 sm:mb-4">How You Can Help</h2>
+          <p className="text-base sm:text-lg lg:text-xl text-muted-foreground">Together, we can make a difference</p>
         </div>
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
           <Card className="hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border-2">
             <CardHeader>
               <Heart className="w-12 h-12 mb-4 text-primary" />
