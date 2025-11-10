@@ -1,76 +1,28 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/hooks/use-toast";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { mockApi } from "@/lib/mockData";
 
 const AdoptPets = () => {
   const { user } = useAuth();
-  const queryClient = useQueryClient();
-  const [selectedPet, setSelectedPet] = useState<any>(null);
+  const [selectedPet, setSelectedPet] = useState<Pet | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [pets, setPets] = useState<Pet[]>([]);
 
-  const { data: pets, isLoading } = useQuery({
-    queryKey: ["approved-pets"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("pets")
-        .select("*")
-        .eq("status", "approved")
-        .order("created_at", { ascending: false });
+  useState(() => {
+    mockApi.getPets().then((fetchedPets) => {
+      setPets(fetchedPets);
+      setIsLoading(false);
+    });
+  }, []);
 
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  const adoptMutation = useMutation({
-    mutationFn: async (petId: string) => {
-      if (!user) throw new Error("Please login to adopt a pet");
-
-      // Get user profile
-      const { data: profile } = await supabase
-        .from("users_profile")
-        .select("id")
-        .eq("user_id", user.id)
-        .maybeSingle();
-
-      if (!profile) throw new Error("Profile not found");
-
-      const { error } = await supabase
-        .from("adoption_requests")
-        .insert({
-          user_id: profile.id,
-          pet_id: petId,
-          request_status: "pending",
-        });
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["adoption-requests"] });
-      toast({
-        title: "Adoption Request Submitted",
-        description: "Your request has been sent to admin for approval.",
-      });
-      setIsDialogOpen(false);
-      setSelectedPet(null);
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
-
-  const handleAdoptClick = (pet: any) => {
+  const handleAdoptClick = (pet: Pet) => {
     if (!user) {
       toast({
         title: "Login Required",
@@ -81,6 +33,26 @@ const AdoptPets = () => {
     }
     setSelectedPet(pet);
     setIsDialogOpen(true);
+  };
+
+  const handleAdoptConfirm = async () => {
+    if (!selectedPet || !user) return;
+
+    try {
+      await mockApi.adoptPet(selectedPet.id, user.id);
+      toast({
+        title: "Adoption Request Submitted",
+        description: "Your request has been sent to admin for approval.",
+      });
+      setIsDialogOpen(false);
+      setSelectedPet(null);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to submit adoption request",
+        variant: "destructive",
+      });
+    }
   };
 
   if (isLoading) {
@@ -189,11 +161,10 @@ const AdoptPets = () => {
                 Cancel
               </Button>
               <Button
-                onClick={() => adoptMutation.mutate(selectedPet?.id)}
-                disabled={adoptMutation.isPending}
+                onClick={handleAdoptConfirm}
                 className="flex-1"
               >
-                {adoptMutation.isPending ? "Submitting..." : "Confirm Request"}
+                Confirm Request
               </Button>
             </div>
           </div>

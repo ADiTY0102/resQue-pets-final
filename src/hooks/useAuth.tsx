@@ -1,33 +1,65 @@
-import { useState, useEffect } from "react";
-import { User, Session } from "@supabase/supabase-js";
-import { supabase } from "@/integrations/supabase/client";
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
-export const useAuth = () => {
+interface User {
+  id: string;
+  email: string;
+  role: 'user' | 'admin';
+}
+
+interface AuthContextType {
+  user: User | null;
+  signIn: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string) => Promise<void>;
+  signOut: () => Promise<void>;
+  loading: boolean;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
-      }
-    );
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
+    // Simulate checking for existing session
+    const savedUser = localStorage.getItem('mockUser');
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
+    setLoading(false);
   }, []);
 
-  const signOut = async () => {
-    await supabase.auth.signOut();
+  const signIn = async (email: string, password: string) => {
+    // Mock sign in
+    const mockUser = { id: '1', email, role: 'user' as const };
+    setUser(mockUser);
+    localStorage.setItem('mockUser', JSON.stringify(mockUser));
   };
 
-  return { user, session, loading, signOut };
+  const signUp = async (email: string, password: string) => {
+    // Mock sign up
+    const mockUser = { id: '1', email, role: 'user' as const };
+    setUser(mockUser);
+    localStorage.setItem('mockUser', JSON.stringify(mockUser));
+  };
+
+  const signOut = async () => {
+    // Mock sign out
+    setUser(null);
+    localStorage.removeItem('mockUser');
+  };
+
+  return (
+    <AuthContext.Provider value={{ user, signIn, signUp, signOut, loading }}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
 };
