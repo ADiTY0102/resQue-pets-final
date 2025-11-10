@@ -4,9 +4,9 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { mockApi } from "@/lib/mockData";
+import { mockApi, type Pet } from "@/lib/mockData";
 
 const AdoptPets = () => {
   const { user } = useAuth();
@@ -15,7 +15,7 @@ const AdoptPets = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [pets, setPets] = useState<Pet[]>([]);
 
-  useState(() => {
+  useEffect(() => {
     mockApi.getPets().then((fetchedPets) => {
       setPets(fetchedPets);
       setIsLoading(false);
@@ -93,10 +93,10 @@ const AdoptPets = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
               {pets.map((pet) => (
                 <Card key={pet.id} className="hover:shadow-xl transition-all duration-300">
-                  {pet.image_url && (
+                  {pet.imageUrl && (
                     <div className="aspect-square w-full overflow-hidden rounded-t-lg">
                       <img
-                        src={pet.image_url}
+                        src={pet.imageUrl}
                         alt={pet.name}
                         className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
                       />
@@ -114,12 +114,10 @@ const AdoptPets = () => {
                       <span className="text-muted-foreground">Age:</span>
                       <span className="font-medium">{pet.age} years</span>
                     </div>
-                    {pet.disease_reason && (
-                      <div className="text-sm">
-                        <p className="text-muted-foreground mb-1">Additional Info:</p>
-                        <p className="text-xs">{pet.disease_reason}</p>
-                      </div>
-                    )}
+                    <div className="text-sm">
+                      <p className="text-muted-foreground mb-1">Description:</p>
+                      <p className="text-xs">{pet.description}</p>
+                    </div>
                     <Button
                       className="w-full"
                       onClick={() => handleAdoptClick(pet)}
