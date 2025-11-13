@@ -1,5 +1,3 @@
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -9,43 +7,42 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
-import { useQueryClient } from "@tanstack/react-query";
 
 const Fundraising = () => {
-  const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
   const [donorName, setDonorName] = useState("");
   const [amount, setAmount] = useState("");
 
-  const { data: metrics } = useQuery({
-    queryKey: ["site-metrics"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("site_metrics")
-        .select("*")
-        .single();
+  // Mock data
+  const metrics = {
+    total_funds: 50000,
+    total_pets_adopted: 42,
+    total_pets_donated: 18,
+  };
 
-      if (error) throw error;
-      return data;
+  const transactions = [
+    {
+      id: '1',
+      donor_name: 'John Doe',
+      amount: 5000,
+      transaction_time: new Date().toISOString(),
     },
-  });
-
-  const { data: transactions } = useQuery({
-    queryKey: ["recent-transactions"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("fund_transactions")
-        .select("*")
-        .order("transaction_time", { ascending: false })
-        .limit(5);
-
-      if (error) throw error;
-      return data;
+    {
+      id: '2',
+      donor_name: 'Jane Smith',
+      amount: 10000,
+      transaction_time: new Date(Date.now() - 86400000).toISOString(),
     },
-  });
+    {
+      id: '3',
+      donor_name: 'Mike Johnson',
+      amount: 3500,
+      transaction_time: new Date(Date.now() - 172800000).toISOString(),
+    },
+  ];
 
   const totalFunds = Number(metrics?.total_funds || 0);
-  const fundGoal = 100000; // Set a goal of ₹1,00,000
+  const fundGoal = 100000;
   const progressPercentage = Math.min((totalFunds / fundGoal) * 100, 100);
 
   const handleDonateClick = () => {
@@ -58,64 +55,14 @@ const Fundraising = () => {
       return;
     }
 
-    const amountInPaise = Number(amount) * 100;
-
-    // Load Razorpay script
-    const script = document.createElement("script");
-    script.src = "https://checkout.razorpay.com/v1/checkout.js";
-    script.async = true;
-    script.onload = () => {
-      const options = {
-        key: "rzp_test_Ra1Yhq3ZQGNcDL",
-        amount: amountInPaise,
-        currency: "INR",
-        name: "MOWGLIANS",
-        description: "Donation for Pet Welfare",
-        image: "/logo.png",
-        handler: async function (response: any) {
-          try {
-            // Save transaction to database
-            const { error } = await supabase.from("fund_transactions").insert({
-              donor_name: donorName,
-              amount: Number(amount),
-              utr_id: response.razorpay_payment_id,
-            });
-
-            if (error) throw error;
-
-            // Refresh data
-            queryClient.invalidateQueries({ queryKey: ["site-metrics"] });
-            queryClient.invalidateQueries({ queryKey: ["recent-transactions"] });
-
-            toast({
-              title: "Donation Successful",
-              description: `Thank you for your donation of ₹${amount}!`,
-            });
-            
-            setIsOpen(false);
-            setDonorName("");
-            setAmount("");
-          } catch (error: any) {
-            toast({
-              title: "Error",
-              description: error.message,
-              variant: "destructive",
-            });
-          }
-        },
-        prefill: {
-          name: donorName,
-        },
-        theme: {
-          color: "#3399cc",
-        },
-      };
-
-      const rzp = new (window as any).Razorpay(options);
-      rzp.open();
-    };
+    toast({
+      title: "Donation Successful",
+      description: `Thank you ${donorName} for your donation of ₹${amount}!`,
+    });
     
-    document.body.appendChild(script);
+    setIsOpen(false);
+    setDonorName("");
+    setAmount("");
   };
 
   return (

@@ -1,39 +1,42 @@
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { useState, useEffect } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { format } from "date-fns";
 
+interface Transaction {
+  id: string;
+  donor_name: string;
+  utr_id: string;
+  amount: number;
+  transaction_time: string;
+}
+
 export const FundsManager = () => {
-  const { data: transactions, isLoading: transactionsLoading } = useQuery({
-    queryKey: ["admin-funds"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("fund_transactions")
-        .select("*")
-        .order("transaction_time", { ascending: false });
+  const [isLoading, setIsLoading] = useState(true);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
 
-      if (error) throw error;
-      return data;
-    },
-  });
-// updated
-  const { data: metrics } = useQuery({
-    queryKey: ["site-metrics"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("site_metrics")
-        .select("*")
-        .single();
+  useEffect(() => {
+    // Simulate loading mock transactions
+    setTransactions([
+      {
+        id: '1',
+        donor_name: 'John Doe',
+        utr_id: 'UTR123456789',
+        amount: 5000,
+        transaction_time: new Date().toISOString(),
+      },
+      {
+        id: '2',
+        donor_name: 'Jane Smith',
+        utr_id: 'UTR987654321',
+        amount: 2500,
+        transaction_time: new Date(Date.now() - 86400000).toISOString(),
+      },
+    ]);
+    setIsLoading(false);
+  }, []);
 
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  const totalFunds = transactions?.reduce((sum, t) => sum + Number(t.amount), 0) || 0;
-
-  if (transactionsLoading) return <div>Loading transactions...</div>;
+  const totalFunds = transactions.reduce((sum, t) => sum + Number(t.amount), 0) || 0;
 
   return (
     <div className="space-y-6">
@@ -59,7 +62,7 @@ export const FundsManager = () => {
             <CardTitle className="text-sm font-medium">Pets Adopted</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{metrics?.total_pets_adopted || 0}</div>
+            <div className="text-2xl font-bold">12</div>
           </CardContent>
         </Card>
       </div>

@@ -1,67 +1,79 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { useState, useEffect } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
 
+interface User {
+  id: string;
+  user_id: string;
+  full_name: string;
+  email: string;
+  phone?: string;
+  roles: string[];
+}
+
 export const UsersManager = () => {
-  const queryClient = useQueryClient();
+  const [isLoading, setIsLoading] = useState(true);
+  const [users, setUsers] = useState<User[]>([]);
 
-  const { data: users, isLoading } = useQuery({
-    queryKey: ["admin-users"],
-    queryFn: async () => {
-      const { data: profiles, error: profileError } = await supabase
-        .from("users_profile")
-        .select("*")
-        .order("created_at", { ascending: false });
+  useEffect(() => {
+    // Simulate loading mock users
+    setUsers([
+      {
+        id: '1',
+        user_id: 'user1',
+        full_name: 'John Doe',
+        email: 'john@example.com',
+        phone: '+1234567890',
+        roles: ['user'],
+      },
+      {
+        id: '2',
+        user_id: 'user2',
+        full_name: 'Jane Smith',
+        email: 'jane@example.com',
+        phone: '+0987654321',
+        roles: ['admin'],
+      },
+      {
+        id: '3',
+        user_id: 'user3',
+        full_name: 'Mike Johnson',
+        email: 'mike@example.com',
+        phone: '+5555555555',
+        roles: ['user'],
+      },
+    ]);
+    setIsLoading(false);
+  }, []);
 
-      if (profileError) throw profileError;
-
-      const { data: roles, error: rolesError } = await supabase
-        .from("user_roles")
-        .select("*");
-
-      if (rolesError) throw rolesError;
-
-      return profiles.map((profile) => ({
-        ...profile,
-        roles: roles.filter((r) => r.user_id === profile.user_id).map((r) => r.role),
-      }));
-    },
-  });
-
-  const toggleAdminMutation = useMutation({
-    mutationFn: async ({ userId, isAdmin }: { userId: string; isAdmin: boolean }) => {
-      if (isAdmin) {
-        const { error } = await supabase
-          .from("user_roles")
-          .delete()
-          .eq("user_id", userId)
-          .eq("role", "admin");
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from("user_roles")
-          .insert({ user_id: userId, role: "admin" });
-        if (error) throw error;
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin-users"] });
-      toast({ title: "Role updated successfully" });
-    },
-    onError: (error: any) => {
+  const handleToggleAdmin = (userId: string, isAdmin: boolean) => {
+    try {
+      setUsers(users.map(user =>
+        user.user_id === userId
+          ? {
+              ...user,
+              roles: isAdmin
+                ? user.roles.filter(r => r !== 'admin')
+                : [...user.roles, 'admin']
+            }
+          : user
+      ));
+      toast({
+        title: "Role updated successfully",
+        description: isAdmin ? "Admin role removed" : "Admin role added",
+      });
+    } catch (error: any) {
       toast({
         title: "Error updating role",
         description: error.message,
         variant: "destructive",
       });
-    },
-  });
+    }
+  };
 
   if (isLoading) return <div>Loading users...</div>;
-// updated
   return (
     <div className="rounded-md border">
       <Table>
@@ -92,10 +104,7 @@ export const UsersManager = () => {
                   size="sm"
                   variant="outline"
                   onClick={() =>
-                    toggleAdminMutation.mutate({
-                      userId: user.user_id,
-                      isAdmin: user.roles.includes("admin"),
-                    })
+                    handleToggleAdmin(user.user_id, user.roles.includes("admin"))
                   }
                 >
                   {user.roles.includes("admin") ? "Remove Admin" : "Make Admin"}

@@ -1,6 +1,4 @@
-import { useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,81 +6,56 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
 
 export const EditProfileForm = ({ userId }: { userId: string }) => {
-  const queryClient = useQueryClient();
-
-  const { data: profile, isLoading } = useQuery({
-    queryKey: ["user-profile", userId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("users_profile")
-        .select("*")
-        .eq("user_id", userId)
-        .maybeSingle();
-
-      if (error) throw error;
-      return data;
-    },
-  });
-
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState({
-    full_name: profile?.full_name || "",
-    phone: profile?.phone || "",
-    address: profile?.address || "",
+    full_name: "",
+    phone: "",
+    address: "",
+    email: "user@example.com",
   });
 
-  // Update form data when profile loads
-  useState(() => {
-    if (profile) {
-      setFormData({
-        full_name: profile.full_name || "",
-        phone: profile.phone || "",
-        address: profile.address || "",
-      });
-    }
-  });
+  useEffect(() => {
+    // Simulate loading mock profile data
+    setFormData({
+      full_name: "John Doe",
+      phone: "+1234567890",
+      address: "123 Main St, City, State 12345",
+      email: "user@example.com",
+    });
+    setIsLoading(false);
+  }, [userId]);
 
-  const updateMutation = useMutation({
-    mutationFn: async () => {
-      const { error } = await supabase
-        .from("users_profile")
-        .update({
-          full_name: formData.full_name,
-          phone: formData.phone,
-          address: formData.address,
-        })
-        .eq("user_id", userId);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSaving(true);
 
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["user-profile", userId] });
+    try {
+      // Simulate saving profile
+      await new Promise(resolve => setTimeout(resolve, 500));
       toast({
         title: "Profile updated!",
         description: "Your profile information has been saved.",
       });
-    },
-    onError: (error: any) => {
+    } catch (error: any) {
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive",
       });
-    },
-  });
-
-  if (isLoading) return <div>Loading profile...</div>;
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        updateMutation.mutate();
-      }}
+      onSubmit={handleSubmit}
       className="space-y-4"
     >
       <div className="space-y-2">
         <Label htmlFor="email">Email (Cannot be changed)</Label>
-        <Input id="email" value={profile?.email || ""} disabled />
+        <Input id="email" value={formData.email} disabled />
       </div>
 
       <div className="space-y-2">
@@ -115,8 +88,8 @@ export const EditProfileForm = ({ userId }: { userId: string }) => {
         />
       </div>
 
-      <Button type="submit" disabled={updateMutation.isPending}>
-        {updateMutation.isPending ? "Saving..." : "Save Changes"}
+      <Button type="submit" disabled={isSaving}>
+        {isSaving ? "Saving..." : "Save Changes"}
       </Button>
     </form>
   );

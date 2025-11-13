@@ -1,64 +1,60 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { useState, useEffect } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 
+interface DonationRequest {
+  id: string;
+  user: { full_name: string; email: string; phone: string };
+  pet: { name: string; breed: string; type: string; age: number; disease_reason?: string };
+  request_status: string;
+  created_at: string;
+}
+
 export const DonationsManager = () => {
-  const queryClient = useQueryClient();
+  const [isLoading, setIsLoading] = useState(true);
+  const [requests, setRequests] = useState<DonationRequest[]>([]);
 
-  const { data: requests, isLoading } = useQuery({
-    queryKey: ["admin-donations"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("donation_requests")
-        .select(`
-          *,
-          user:users_profile!donation_requests_user_id_fkey(full_name, email, phone),
-          pet:pets(name, breed, type, age, disease_reason)
-        `)
-        .order("created_at", { ascending: false });
+  useEffect(() => {
+    // Simulate loading mock donation requests
+    setRequests([
+      {
+        id: '1',
+        user: { full_name: 'Alice Brown', email: 'alice@example.com', phone: '+1111111111' },
+        pet: { name: 'Buddy', breed: 'Labrador', type: 'dog', age: 3, disease_reason: 'Injured leg, recovering' },
+        request_status: 'pending',
+        created_at: new Date().toISOString(),
+      },
+      {
+        id: '2',
+        user: { full_name: 'Bob Wilson', email: 'bob@example.com', phone: '+2222222222' },
+        pet: { name: 'Whiskers', breed: 'Siamese', type: 'cat', age: 2 },
+        request_status: 'approved',
+        created_at: new Date(Date.now() - 86400000).toISOString(),
+      },
+    ]);
+    setIsLoading(false);
+  }, []);
 
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  const updateStatusMutation = useMutation({
-    mutationFn: async ({ id, status }: { id: string; status: string }) => {
-      const { error: requestError } = await supabase
-        .from("donation_requests")
-        .update({ request_status: status })
-        .eq("id", id);
-      
-      if (requestError) throw requestError;
-
-      // If approved, update pet status to approved for adoption
-      // If rejected, update pet status to rejected
-      const request = requests?.find((r: any) => r.id === id);
-      if (request?.pet_id) {
-        const { error: petError } = await supabase
-          .from("pets")
-          .update({ status: status === "approved" ? "approved" : "rejected" })
-          .eq("id", request.pet_id);
-        
-        if (petError) throw petError;
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin-donations"] });
-      toast({ title: "Donation request updated" });
-    },
-    onError: (error: any) => {
+  const handleStatusUpdate = async (id: string, status: string) => {
+    try {
+      setRequests(requests.map(req => 
+        req.id === id ? { ...req, request_status: status } : req
+      ));
+      toast({
+        title: "Donation request updated",
+        description: `Status changed to ${status}`,
+      });
+    } catch (error: any) {
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive",
       });
-    },
-  });
+    }
+  };
 
   if (isLoading) return <div>Loading donation requests...</div>;
 
@@ -118,7 +114,7 @@ export const DonationsManager = () => {
                     size="sm"
                     variant="outline"
                     onClick={() =>
-                      updateStatusMutation.mutate({ id: request.id, status: "approved" })
+                      handleStatusUpdate(request.id, "approved")
                     }
                     disabled={request.request_status === "approved"}
                   >
@@ -128,7 +124,7 @@ export const DonationsManager = () => {
                     size="sm"
                     variant="outline"
                     onClick={() =>
-                      updateStatusMutation.mutate({ id: request.id, status: "rejected" })
+                      handleStatusUpdate(request.id, "rejected")
                     }
                     disabled={request.request_status === "rejected"}
                   >

@@ -1,34 +1,37 @@
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { useState, useEffect } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 
+interface AdoptionRequest {
+  id: string;
+  pet: { name: string; breed: string; type: string; imageUrl: string };
+  created_at: string;
+  request_status: string;
+  admin_comment?: string;
+}
+
 export const AdoptionRequests = ({ userId }: { userId: string }) => {
-  const { data: requests, isLoading } = useQuery({
-    queryKey: ["user-adoptions", userId],
-    queryFn: async () => {
-      const { data: profile } = await supabase
-        .from("users_profile")
-        .select("id")
-        .eq("user_id", userId)
-        .single();
+  const [isLoading, setIsLoading] = useState(true);
+  const [requests, setRequests] = useState<AdoptionRequest[]>([]);
 
-      if (!profile) return [];
-
-      const { data, error } = await supabase
-        .from("adoption_requests")
-        .select(`
-          *,
-          pet:pets(name, breed, type, image_url)
-        `)
-        .eq("user_id", profile.id)
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
-      return data;
-    },
-  });
+  useEffect(() => {
+    // Simulate loading mock adoption requests
+    setRequests([
+      {
+        id: '1',
+        pet: {
+          name: 'Max',
+          breed: 'Golden Retriever',
+          type: 'dog',
+          imageUrl: 'https://images.unsplash.com/photo-1633722715463-d30f4f325e24',
+        },
+        created_at: new Date().toISOString(),
+        request_status: 'pending',
+      },
+    ]);
+    setIsLoading(false);
+  }, [userId]);
 
   if (isLoading) return <div>Loading your requests...</div>;
   if (!requests?.length) return <div className="text-muted-foreground">No adoption requests yet.</div>;

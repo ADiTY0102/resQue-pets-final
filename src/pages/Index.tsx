@@ -5,24 +5,14 @@ import { Heart, PawPrint, DollarSign } from "lucide-react";
 import { Link } from "react-router-dom";
 import { GallerySection } from "@/components/home/GallerySection";
 import { Footer } from "@/components/home/Footer";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
   const { user, signOut } = useAuth();
 
-  const { data: metrics } = useQuery({
-    queryKey: ["site-metrics"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("site_metrics")
-        .select("*")
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
-  });
+  // Mock metrics data
+  const metrics = {
+    total_funds: 50000,
+  };
 
   return (
     <div className="min-h-screen bg-background">

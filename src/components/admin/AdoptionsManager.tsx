@@ -1,65 +1,60 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { useState, useEffect } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 
+interface AdoptionRequest {
+  id: string;
+  user: { full_name: string; email: string; phone: string };
+  pet: { name: string; breed: string; type: string };
+  request_status: string;
+  created_at: string;
+}
+
 export const AdoptionsManager = () => {
-  const queryClient = useQueryClient();
+  const [isLoading, setIsLoading] = useState(true);
+  const [requests, setRequests] = useState<AdoptionRequest[]>([]);
 
-  const { data: requests, isLoading } = useQuery({
-    queryKey: ["admin-adoptions"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("adoption_requests")
-        .select(`
-          *,
-          user:users_profile!adoption_requests_user_id_fkey(full_name, email, phone),
-          pet:pets(name, breed, type)
-        `)
-        .order("created_at", { ascending: false });
+  useEffect(() => {
+    // Simulate loading mock adoption requests
+    setRequests([
+      {
+        id: '1',
+        user: { full_name: 'John Doe', email: 'john@example.com', phone: '+1234567890' },
+        pet: { name: 'Max', breed: 'Golden Retriever', type: 'dog' },
+        request_status: 'pending',
+        created_at: new Date().toISOString(),
+      },
+      {
+        id: '2',
+        user: { full_name: 'Jane Smith', email: 'jane@example.com', phone: '+0987654321' },
+        pet: { name: 'Luna', breed: 'Persian', type: 'cat' },
+        request_status: 'approved',
+        created_at: new Date(Date.now() - 86400000).toISOString(),
+      },
+    ]);
+    setIsLoading(false);
+  }, []);
 
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  const updateStatusMutation = useMutation({
-    mutationFn: async ({ id, status }: { id: string; status: string }) => {
-      const { error: requestError } = await supabase
-        .from("adoption_requests")
-        .update({ request_status: status })
-        .eq("id", id);
-      
-      if (requestError) throw requestError;
-
-      // If approved, mark the pet as adopted
-      if (status === "approved") {
-        const request = requests?.find((r: any) => r.id === id);
-        if (request?.pet_id) {
-          const { error: petError } = await supabase
-            .from("pets")
-            .update({ status: "adopted" })
-            .eq("id", request.pet_id);
-          
-          if (petError) throw petError;
-        }
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin-adoptions"] });
-      toast({ title: "Adoption request updated" });
-    },
-    onError: (error: any) => {
+  const handleStatusUpdate = async (id: string, status: string) => {
+    try {
+      setRequests(requests.map(req => 
+        req.id === id ? { ...req, request_status: status } : req
+      ));
+      toast({
+        title: "Adoption request updated",
+        description: `Status changed to ${status}`,
+      });
+    } catch (error: any) {
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive",
       });
-    },
-  });
+    }
+  };
 
   if (isLoading) return <div>Loading adoption requests...</div>;
 
@@ -109,7 +104,7 @@ export const AdoptionsManager = () => {
                     size="sm"
                     variant="outline"
                     onClick={() =>
-                      updateStatusMutation.mutate({ id: request.id, status: "approved" })
+                      handleStatusUpdate(request.id, "approved")
                     }
                     disabled={request.request_status === "approved"}
                   >
@@ -119,7 +114,7 @@ export const AdoptionsManager = () => {
                     size="sm"
                     variant="outline"
                     onClick={() =>
-                      updateStatusMutation.mutate({ id: request.id, status: "rejected" })
+                      handleStatusUpdate(request.id, "rejected")
                     }
                     disabled={request.request_status === "rejected"}
                   >

@@ -1,6 +1,4 @@
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,75 +10,41 @@ export const GalleryUpload = () => {
   const [file, setFile] = useState<File | null>(null);
   const [description, setDescription] = useState("");
   const [uploading, setUploading] = useState(false);
-  const queryClient = useQueryClient();
 
-  const uploadMutation = useMutation({
-    mutationFn: async () => {
-      if (!file) throw new Error("Please select a file");
+  const handleUpload = async () => {
+    if (!file) {
+      toast({
+        title: "No file selected",
+        description: "Please select an image to upload",
+        variant: "destructive",
+      });
+      return;
+    }
 
-      setUploading(true);
+    setUploading(true);
 
-      // Upload to storage
-      const fileExt = file.name.split(".").pop();
-      const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
-      const filePath = `${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from("gallery_images")
-        .upload(filePath, file);
-
-      if (uploadError) throw uploadError;
-
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from("gallery_images")
-        .getPublicUrl(filePath);
-
-      // Get user profile ID
-      const { data: userData } = await supabase.auth.getUser();
-      
-      // Fetch users_profile.id instead of auth.uid()
-      const { data: profileData, error: profileError } = await supabase
-        .from("users_profile")
-        .select("id")
-        .eq("user_id", userData.user?.id)
-        .single();
-      
-      if (profileError) throw new Error("Could not find user profile");
-
-      // Save to gallery table
-      const { error: insertError } = await supabase
-        .from("gallery")
-        .insert({
-          image_url: publicUrl,
-          description: description || null,
-          uploaded_by: profileData.id,
-        });
-
-      if (insertError) throw insertError;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["gallery-images"] });
+    try {
+      // Simulate file upload
       toast({
         title: "Image Uploaded",
         description: "Image has been added to the gallery.",
       });
       setFile(null);
       setDescription("");
-      setUploading(false);
+      
       // Reset file input
       const fileInput = document.getElementById("gallery-upload") as HTMLInputElement;
       if (fileInput) fileInput.value = "";
-    },
-    onError: (error: any) => {
+    } catch (error: any) {
       toast({
         title: "Upload Failed",
         description: error.message,
         variant: "destructive",
       });
+    } finally {
       setUploading(false);
-    },
-  });
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -119,7 +83,7 @@ export const GalleryUpload = () => {
       )}
 
       <Button
-        onClick={() => uploadMutation.mutate()}
+        onClick={handleUpload}
         disabled={!file || uploading}
         className="w-full"
       >
